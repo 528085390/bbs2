@@ -1,0 +1,61 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: bbs-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+      username: nacos
+      password: 123456
+    gateway:
+      routes:
+        - id: auth
+          uri: lb://bbs-auth-service
+          predicates:
+            - Path=/api/auth/**
+        - id: user
+          uri: lb://bbs-user-service
+          predicates:
+            - Path=/api/users/**
+        - id: permission
+          uri: lb://bbs-permission-service
+          predicates:
+            - Path=/api/permissions/**
+        - id: section
+          uri: lb://bbs-section-service
+          predicates:
+            - Path=/api/sections/**
+        - id: post
+          uri: lb://bbs-post-service
+          predicates:
+            - Path=/api/posts/**
+        - id: comment
+          uri: lb://bbs-comment-service
+          predicates:
+            - Path=/api/comments/**,/api/posts/*/comments/**
+        - id: interaction
+          uri: lb://bbs-interaction-service
+          predicates:
+            - Path=/api/interactions/**,/api/posts/*/likes/**,/api/users/*/follows/**
+        - id: notification
+          uri: lb://bbs-notification-service
+          predicates:
+            - Path=/api/notifications/**
+        - id: file
+          uri: lb://bbs-file-service
+          predicates:
+            - Path=/api/files/**
+        - id: search
+          uri: lb://bbs-search-service
+          predicates:
+            - Path=/api/search/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+

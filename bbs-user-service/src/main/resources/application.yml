@@ -1,0 +1,17 @@
+server:
+  port: 9002
+spring:
+  application:
+    name: bbs-user-service
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_ADDR:127.0.0.1:8848}
+      username: nacos
+      password: 123456
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+

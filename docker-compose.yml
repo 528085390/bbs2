@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  nacos:
+    image: nacos/nacos-server:v2.3.2
+    environment:
+      - MODE=standalone
+    ports:
+      - "8848:8848"
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+
