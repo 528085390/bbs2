@@ -1,36 +1,22 @@
 package com.li.bbs.interaction.domain;
 
-import jakarta.persistence.*;
-
 import java.time.Instant;
 
-@Entity
-@Table(name = "interactions", uniqueConstraints = @UniqueConstraint(name = "uk_interaction", columnNames = {
-        "user_id", "target_type", "target_id", "action_type"
-}))
 public class Interaction {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "user_id", nullable = false)
     private Long userId;
-
-    @Column(name = "target_type", nullable = false)
     private String targetType;
-
-    @Column(name = "target_id", nullable = false)
     private Long targetId;
-
-    @Column(name = "action_type", nullable = false)
     private String actionType;
-
-    @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getUserId() {
@@ -64,5 +50,12 @@ public class Interaction {
     public void setActionType(String actionType) {
         this.actionType = actionType;
     }
-}
 
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+}

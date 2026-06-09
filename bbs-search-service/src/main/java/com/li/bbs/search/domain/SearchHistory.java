@@ -1,28 +1,20 @@
 package com.li.bbs.search.domain;
 
-import jakarta.persistence.*;
-
 import java.time.Instant;
 
-@Entity
-@Table(name = "search_history")
 public class SearchHistory {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "user_id")
     private Long userId;
-
-    @Column(nullable = false)
     private String keyword;
-
-    @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getUserId() {
@@ -40,5 +32,12 @@ public class SearchHistory {
     public void setKeyword(String keyword) {
         this.keyword = keyword;
     }
-}
 
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+}

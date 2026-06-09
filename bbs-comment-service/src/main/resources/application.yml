@@ -7,16 +7,17 @@ spring:
     nacos:
       discovery:
         server-addr: ${NACOS_ADDR:127.0.0.1:8848}
-      username: nacos
-      password: 123456
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:123456}
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/bbs_forum_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:root}
     password: ${MYSQL_PASSWORD:123456}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.li.bbs.comment.domain
+  configuration:
+    map-underscore-to-camel-case: true
 management:
   endpoints:
     web:

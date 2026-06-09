@@ -21,13 +21,13 @@ public class SearchController {
     }
 
     @GetMapping
-    public ApiResponse<List<Map<String, Object>>> search(@RequestParam String q,
-                                                          @RequestParam(required = false) Long userId) {
+    public ApiResponse<List<Map<String, Object>>> search(@RequestParam("q") String q,
+                                                          @RequestParam(value = "userId", required = false) Long userId) {
         return ApiResponse.ok(searchService.search(q, userId));
     }
 
     @GetMapping("/suggest")
-    public ApiResponse<List<String>> suggest(@RequestParam String q) {
+    public ApiResponse<List<String>> suggest(@RequestParam("q") String q) {
         return ApiResponse.ok(searchService.suggest(q));
     }
 }

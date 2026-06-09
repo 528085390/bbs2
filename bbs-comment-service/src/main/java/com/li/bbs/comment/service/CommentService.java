@@ -37,25 +37,32 @@ public class CommentService {
         comment.setAuthorId(request.authorId());
         comment.setParentId(request.parentId());
         comment.setContent(request.content());
+        comment.setDeleted(false);
 
-        if (request.parentId() != null) {
-            Comment parent = commentRepository.findById(request.parentId())
-                    .orElseThrow(() -> new IllegalArgumentException("parent comment not found"));
+        if (request.parentId() != null && request.parentId() > 0) {
+            Comment parent = commentRepository.selectById(request.parentId());
+            if (parent == null) {
+                throw new IllegalArgumentException("parent comment not found");
+            }
             comment.setDepth(parent.getDepth() + 1);
+        } else {
+            // 顶级评论
+            comment.setParentId(null);
+            comment.setDepth(0);
         }
 
-        Comment saved = commentRepository.save(comment);
+        commentRepository.insert(comment);
 
         Long postAuthorId = Long.parseLong(String.valueOf(metaResp.data().get("authorId")));
         if (!postAuthorId.equals(request.authorId())) {
             notificationClient.sendCommentNotification(Map.of(
                     "userId", postAuthorId,
                     "type", "COMMENT",
-                    "payload", "postId=" + postId + ",commentId=" + saved.getId() + ",fromUserId=" + request.authorId()
+                    "payload", "postId=" + postId + ",commentId=" + comment.getId() + ",fromUserId=" + request.authorId()
             ));
         }
 
-        return saved;
+        return comment;
     }
 
     public List<Comment> list(Long postId) {
@@ -64,9 +71,11 @@ public class CommentService {
 
     @Transactional
     public void delete(Long id) {
-        Comment comment = commentRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("comment not found"));
+        Comment comment = commentRepository.selectById(id);
+        if (comment == null) {
+            throw new IllegalArgumentException("comment not found");
+        }
         comment.setDeleted(true);
-        commentRepository.save(comment);
+        commentRepository.updateDeleted(comment);
     }
 }
-

@@ -24,8 +24,9 @@ public class JwtProvider {
         this.expirationMs = expirationMs;
     }
 
-    public String generateToken(String username, List<String> roles) {
+    public String generateToken(Long userId, String username, List<String> roles) {
         Claims claims = Jwts.claims().setSubject(username);
+        claims.put("userId", userId);
         claims.put("roles", roles);
         Date now = new Date();
         Date exp = new Date(now.getTime() + expirationMs);

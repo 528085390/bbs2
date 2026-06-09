@@ -49,7 +49,7 @@ public class InteractionService {
             FollowRelation relation = new FollowRelation();
             relation.setUserId(userId);
             relation.setTargetUserId(targetUserId);
-            followRelationRepository.save(relation);
+            followRelationRepository.insert(relation);
             notificationClient.sendInteractionNotification(Map.of(
                     "userId", targetUserId,
                     "type", "FOLLOW",
@@ -75,7 +75,7 @@ public class InteractionService {
             interaction.setTargetType("POST");
             interaction.setTargetId(postId);
             interaction.setActionType(action);
-            interactionRepository.save(interaction);
+            interactionRepository.insert(interaction);
 
             Long postAuthorId = Long.parseLong(String.valueOf(metaResp.data().get("authorId")));
             if (!postAuthorId.equals(userId)) {
@@ -88,4 +88,3 @@ public class InteractionService {
         }
     }
 }
-

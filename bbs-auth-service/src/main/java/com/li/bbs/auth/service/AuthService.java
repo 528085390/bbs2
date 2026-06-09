@@ -49,23 +49,27 @@ public class AuthService {
         user.setDisplayName(request.username());
         user.setPassword(passwordEncoder.encode(request.password()));
 
-        Role role = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
-            Role r = new Role();
-            r.setName("ROLE_USER");
-            return roleRepository.save(r);
-        });
-        user.getRoles().add(role);
-        userRepository.save(user);
+        Role role = roleRepository.findByName("ROLE_USER");
+        if (role == null) {
+            role = new Role();
+            role.setName("ROLE_USER");
+            roleRepository.insert(role);
+        }
+
+        userRepository.insert(user);
+        userRepository.insertUserRole(user.getId(), role.getId());
     }
 
     public LoginResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
         );
-        User user = userRepository.findByUsername(request.username())
-                .orElseThrow(() -> new IllegalArgumentException("invalid credentials"));
+        User user = userRepository.findByUsername(request.username());
+        if (user == null) {
+            throw new IllegalArgumentException("invalid credentials");
+        }
 
-        String token = jwtProvider.generateToken(user.getUsername(), user.getRoles().stream().map(Role::getName).toList());
+        String token = jwtProvider.generateToken(user.getId(), user.getUsername(), userRepository.findRolesByUserId(user.getId()).stream().map(Role::getName).toList());
         return new LoginResponse(token, 3600);
     }
 }

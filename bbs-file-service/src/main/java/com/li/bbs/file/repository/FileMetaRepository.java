@@ -1,8 +1,13 @@
 package com.li.bbs.file.repository;
 
 import com.li.bbs.file.domain.FileMeta;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
-public interface FileMetaRepository extends JpaRepository<FileMeta, Long> {
+@Mapper
+@Repository
+public interface FileMetaRepository {
+    FileMeta findById(Long id);
+    int insert(FileMeta meta);
+    int deleteById(Long id);
 }
-

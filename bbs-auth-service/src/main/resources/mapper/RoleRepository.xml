@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.li.bbs.auth.repository.RoleRepository">
+
+  <select id="findByName" parameterType="string" resultType="com.li.bbs.auth.domain.Role">
+    SELECT id, name
+    FROM roles
+    WHERE name = #{name}
+  </select>
+
+  <insert id="insert" parameterType="com.li.bbs.auth.domain.Role" useGeneratedKeys="true" keyProperty="id">
+    INSERT INTO roles(name)
+    VALUES (#{name})
+  </insert>
+
+</mapper>
+

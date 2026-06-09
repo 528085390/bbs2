@@ -22,21 +22,27 @@ public class SectionService {
     }
 
     public Section get(Long id) {
-        return sectionRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("section not found"));
+        Section section = sectionRepository.selectById(id);
+        if (section == null) {
+            throw new IllegalArgumentException("section not found");
+        }
+        return section;
     }
 
     @Transactional
     public Section create(SectionRequest request) {
         Section section = new Section();
         apply(request, section);
-        return sectionRepository.save(section);
+        sectionRepository.insert(section);
+        return section;
     }
 
     @Transactional
     public Section update(Long id, SectionRequest request) {
         Section section = get(id);
         apply(request, section);
-        return sectionRepository.save(section);
+        sectionRepository.update(section);
+        return section;
     }
 
     @Transactional
@@ -51,4 +57,3 @@ public class SectionService {
         section.setVisibility(request.visibility() == null ? "PUBLIC" : request.visibility());
     }
 }
-

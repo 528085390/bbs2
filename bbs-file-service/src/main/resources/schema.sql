@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS file_meta (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  owner_type VARCHAR(64) NOT NULL,
+  owner_id BIGINT NOT NULL,
+  filename VARCHAR(255) NOT NULL,
+  storage_path VARCHAR(512) NOT NULL,
+  content_type VARCHAR(128),
+  size BIGINT,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+

@@ -1,49 +1,26 @@
 package com.li.bbs.post.domain;
 
-import jakarta.persistence.*;
-
 import java.time.Instant;
 
-@Entity
-@Table(name = "posts")
 public class Post {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "section_id", nullable = false)
     private Long sectionId;
-
-    @Column(name = "author_id", nullable = false)
     private Long authorId;
-
-    @Column(nullable = false)
     private String title;
-
-    @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
-
     private Boolean pinned = false;
-
     private Boolean featured = false;
-
-    @Column(name = "view_count")
     private Long viewCount = 0L;
-
-    @Column(name = "created_at")
     private Instant createdAt = Instant.now();
-
-    @Column(name = "updated_at")
     private Instant updatedAt = Instant.now();
-
-    @PreUpdate
-    public void preUpdate() {
-        this.updatedAt = Instant.now();
-    }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getSectionId() {
@@ -106,8 +83,15 @@ public class Post {
         return createdAt;
     }
 
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public Instant getUpdatedAt() {
         return updatedAt;
     }
-}
 
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+}

@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS sections (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+  order_index INT DEFAULT 0,
+  visibility VARCHAR(32) DEFAULT 'PUBLIC'
+);
+

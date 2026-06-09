@@ -26,7 +26,7 @@ public class SearchService {
         SearchHistory history = new SearchHistory();
         history.setUserId(userId);
         history.setKeyword(q);
-        searchHistoryRepository.save(history);
+        searchHistoryRepository.insert(history);
 
         ApiResponse<List<Map<String, Object>>> resp = postClient.search(q);
         if (resp == null || resp.code() != 0 || resp.data() == null) {
@@ -71,4 +71,3 @@ public class SearchService {
         return snippet.replaceAll("(?i)" + java.util.regex.Pattern.quote(q), "<em>" + q + "</em>");
     }
 }
-

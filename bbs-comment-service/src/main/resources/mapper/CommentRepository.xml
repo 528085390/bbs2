@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.li.bbs.comment.repository.CommentRepository">
+
+    <resultMap id="CommentResultMap" type="com.li.bbs.comment.domain.Comment">
+        <id column="id" property="id"/>
+        <result column="post_id" property="postId"/>
+        <result column="author_id" property="authorId"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="content" property="content"/>
+        <result column="depth" property="depth"/>
+        <result column="deleted" property="deleted"/>
+        <result column="created_at" property="createdAt"/>
+    </resultMap>
+
+    <select id="findByPostIdAndDeletedFalseOrderByCreatedAtAsc" resultMap="CommentResultMap">
+        SELECT id, post_id, author_id, parent_id, content, depth, deleted, created_at
+        FROM comments
+        WHERE post_id = #{postId} AND deleted = 0
+        ORDER BY created_at ASC
+    </select>
+
+    <select id="selectById" resultMap="CommentResultMap">
+        SELECT id, post_id, author_id, parent_id, content, depth, deleted, created_at
+        FROM comments
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.li.bbs.comment.domain.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comments(post_id, author_id, parent_id, content, depth, deleted, created_at)
+        VALUES(#{postId}, #{authorId}, #{parentId}, #{content}, #{depth}, #{deleted}, NOW())
+    </insert>
+
+    <update id="updateDeleted" parameterType="com.li.bbs.comment.domain.Comment">
+        UPDATE comments SET deleted = #{deleted} WHERE id = #{id}
+    </update>
+
+</mapper>
+

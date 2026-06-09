@@ -1,28 +1,19 @@
 package com.li.bbs.section.domain;
 
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "sections")
 public class Section {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false)
     private String title;
-
-    @Column(columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "order_index")
     private Integer orderIndex = 0;
-
     private String visibility = "PUBLIC";
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -57,4 +48,3 @@ public class Section {
         this.visibility = visibility;
     }
 }
-

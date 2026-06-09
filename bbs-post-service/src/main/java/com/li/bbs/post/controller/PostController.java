@@ -27,40 +27,40 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Post> get(@PathVariable Long id) {
+    public ApiResponse<Post> get(@PathVariable("id") Long id) {
         return ApiResponse.ok(postService.getAndIncreaseView(id));
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<Post> update(@PathVariable Long id, @Valid @RequestBody PostRequest request) {
+    public ApiResponse<Post> update(@PathVariable("id") Long id, @Valid @RequestBody PostRequest request) {
         return ApiResponse.ok(postService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable("id") Long id) {
         postService.delete(id);
         return ApiResponse.ok();
     }
 
     @PostMapping("/{id}/pin")
-    public ApiResponse<Void> pin(@PathVariable Long id, @RequestParam boolean value) {
+    public ApiResponse<Void> pin(@PathVariable("id") Long id, @RequestParam boolean value) {
         postService.pin(id, value);
         return ApiResponse.ok();
     }
 
     @PostMapping("/{id}/feature")
-    public ApiResponse<Void> feature(@PathVariable Long id, @RequestParam boolean value) {
+    public ApiResponse<Void> feature(@PathVariable("id") Long id, @RequestParam boolean value) {
         postService.feature(id, value);
         return ApiResponse.ok();
     }
 
     @GetMapping("/{id}/exists")
-    public ApiResponse<Boolean> exists(@PathVariable Long id) {
+    public ApiResponse<Boolean> exists(@PathVariable("id") Long id) {
         return ApiResponse.ok(postService.exists(id));
     }
 
     @GetMapping("/{id}/meta")
-    public ApiResponse<Map<String, Object>> meta(@PathVariable Long id) {
+    public ApiResponse<Map<String, Object>> meta(@PathVariable("id") Long id) {
         Post post = postService.get(id);
         return ApiResponse.ok(Map.of(
                 "id", post.getId(),
@@ -70,8 +70,13 @@ public class PostController {
         ));
     }
 
+    @GetMapping("/section/{sectionId}")
+    public ApiResponse<List<Post>> listBySection(@PathVariable("sectionId") Long sectionId) {
+        return ApiResponse.ok(postService.listBySection(sectionId));
+    }
+
     @GetMapping("/internal/search")
-    public ApiResponse<List<Map<String, Object>>> internalSearch(@RequestParam String q) {
+    public ApiResponse<List<Map<String, Object>>> internalSearch(@RequestParam("q") String q) {
         List<Map<String, Object>> result = postService.search(q).stream()
                 .map(post -> {
                     Map<String, Object> item = new HashMap<>();
@@ -85,7 +90,7 @@ public class PostController {
     }
 
     @GetMapping("/internal/suggest")
-    public ApiResponse<List<String>> internalSuggest(@RequestParam String q) {
+    public ApiResponse<List<String>> internalSuggest(@RequestParam("q") String q) {
         return ApiResponse.ok(postService.suggest(q));
     }
 }

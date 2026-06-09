@@ -1,12 +1,15 @@
 package com.li.bbs.interaction.repository;
 
 import com.li.bbs.interaction.domain.FollowRelation;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface FollowRelationRepository extends JpaRepository<FollowRelation, Long> {
+@Mapper
+@Repository
+public interface FollowRelationRepository {
     boolean existsByUserIdAndTargetUserId(Long userId, Long targetUserId);
     List<FollowRelation> findByTargetUserId(Long targetUserId);
+    int insert(FollowRelation relation);
 }
-

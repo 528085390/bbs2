@@ -1,16 +1,25 @@
 package com.li.bbs.post.repository;
 
 import com.li.bbs.post.domain.Post;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface PostRepository extends JpaRepository<Post, Long> {
-
-    @Query(value = "SELECT * FROM posts WHERE MATCH(title, content) AGAINST (?1 IN BOOLEAN MODE)", nativeQuery = true)
-    List<Post> fullTextSearch(String keyword);
-
-    List<Post> findTop10ByTitleStartingWithIgnoreCaseOrderByCreatedAtDesc(String keyword);
+@Mapper
+@Repository
+public interface PostRepository {
+    Post selectById(Long id);
+    int insert(Post post);
+    int update(Post post);
+    int deleteById(Long id);
+    int increaseViewCount(Long id);
+    int updatePinned(@Param("id") Long id, @Param("value") boolean value);
+    int updateFeatured(@Param("id") Long id, @Param("value") boolean value);
+    boolean existsById(Long id);
+    List<Post> fullTextSearch(@Param("keyword") String keyword);
+    List<Post> findBySectionIdOrderByCreatedAtDesc(@Param("sectionId") Long sectionId);
+    List<Post> findAllOrderByCreatedAtDesc();
+    List<Post> findTop10ByTitleStartingWithIgnoreCaseOrderByCreatedAtDesc(@Param("keyword") String keyword);
 }
-

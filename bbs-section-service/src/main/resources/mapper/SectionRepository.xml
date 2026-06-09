@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.li.bbs.section.repository.SectionRepository">
+
+    <resultMap id="SectionResultMap" type="com.li.bbs.section.domain.Section">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="order_index" property="orderIndex"/>
+        <result column="visibility" property="visibility"/>
+    </resultMap>
+
+    <select id="findAllByOrderByOrderIndexAscIdAsc" resultMap="SectionResultMap">
+        SELECT id, title, description, order_index, visibility
+        FROM sections
+        ORDER BY order_index ASC, id ASC
+    </select>
+
+    <select id="selectById" resultMap="SectionResultMap">
+        SELECT id, title, description, order_index, visibility
+        FROM sections
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.li.bbs.section.domain.Section" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sections(title, description, order_index, visibility)
+        VALUES(#{title}, #{description}, #{orderIndex}, #{visibility})
+    </insert>
+
+    <update id="update" parameterType="com.li.bbs.section.domain.Section">
+        UPDATE sections SET title = #{title}, description = #{description}, order_index = #{orderIndex}, visibility = #{visibility} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sections WHERE id = #{id}
+    </delete>
+
+</mapper>
+

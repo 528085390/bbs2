@@ -1,12 +1,15 @@
 package com.li.bbs.notification.repository;
 
 import com.li.bbs.notification.domain.Notification;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
+@Mapper
+@Repository
+public interface NotificationRepository {
     List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
     List<Notification> findAllByOrderByCreatedAtDesc();
+    int insert(Notification notification);
 }
-

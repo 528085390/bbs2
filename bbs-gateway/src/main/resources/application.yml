@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: 8888
 
 spring:
   application:
@@ -11,6 +11,15 @@ spring:
       username: nacos
       password: 123456
     gateway:
+      # 全局跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
       routes:
         - id: auth
           uri: lb://bbs-auth-service
@@ -28,14 +37,14 @@ spring:
           uri: lb://bbs-section-service
           predicates:
             - Path=/api/sections/**
+        - id: comment
+          uri: lb://bbs-comment-service
+          predicates:
+            - Path=/api/posts/{postId}/comments/**,/api/comments/**
         - id: post
           uri: lb://bbs-post-service
           predicates:
             - Path=/api/posts/**
-        - id: comment
-          uri: lb://bbs-comment-service
-          predicates:
-            - Path=/api/comments/**,/api/posts/*/comments/**
         - id: interaction
           uri: lb://bbs-interaction-service
           predicates:
@@ -58,4 +67,8 @@ management:
     web:
       exposure:
         include: health,info
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change_this_secret_to_a_long_random_value_at_least_32_chars}
 

@@ -1,13 +1,12 @@
 package com.li.bbs.repository;
 
 import com.li.bbs.domain.Role;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.apache.ibatis.annotations.Mapper;
 
-import java.util.Optional;
+@Mapper
+public interface RoleRepository {
+    Role findByName(@org.apache.ibatis.annotations.Param("name") String name);
 
-@Repository
-public interface RoleRepository extends JpaRepository<Role, Long> {
-    Optional<Role> findByName(String name);
+    int insert(Role role);
 }
 

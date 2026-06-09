@@ -1,38 +1,24 @@
 package com.li.bbs.comment.domain;
 
-import jakarta.persistence.*;
-
 import java.time.Instant;
 
-@Entity
-@Table(name = "comments")
 public class Comment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "post_id", nullable = false)
     private Long postId;
-
-    @Column(name = "author_id", nullable = false)
     private Long authorId;
-
-    @Column(name = "parent_id")
     private Long parentId;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
-
     private Integer depth = 0;
-
     private Boolean deleted = false;
-
-    @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getPostId() {
@@ -86,5 +72,8 @@ public class Comment {
     public Instant getCreatedAt() {
         return createdAt;
     }
-}
 
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+}

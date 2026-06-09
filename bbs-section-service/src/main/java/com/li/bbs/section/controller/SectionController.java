@@ -25,7 +25,7 @@ public class SectionController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<Section> get(@PathVariable Long id) {
+    public ApiResponse<Section> get(@PathVariable("id") Long id) {
         return ApiResponse.ok(sectionService.get(id));
     }
 
@@ -35,12 +35,12 @@ public class SectionController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<Section> update(@PathVariable Long id, @Valid @RequestBody SectionRequest request) {
+    public ApiResponse<Section> update(@PathVariable("id") Long id, @Valid @RequestBody SectionRequest request) {
         return ApiResponse.ok(sectionService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable("id") Long id) {
         sectionService.delete(id);
         return ApiResponse.ok();
     }

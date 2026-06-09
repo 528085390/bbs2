@@ -1,34 +1,22 @@
 package com.li.bbs.notification.domain;
 
-import jakarta.persistence.*;
-
 import java.time.Instant;
 
-@Entity
-@Table(name = "notifications")
 public class Notification {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "user_id", nullable = false)
     private Long userId;
-
-    @Column(nullable = false)
     private String type;
-
-    @Column(columnDefinition = "TEXT")
     private String payload;
-
-    @Column(name = "is_read")
     private Boolean read = false;
-
-    @Column(name = "created_at")
     private Instant createdAt = Instant.now();
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getUserId() {
@@ -66,5 +54,8 @@ public class Notification {
     public Instant getCreatedAt() {
         return createdAt;
     }
-}
 
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+}

@@ -33,14 +33,19 @@ public class PostService {
         post.setAuthorId(request.authorId());
         post.setTitle(request.title());
         post.setContent(request.content());
-        return postRepository.save(post);
+        post.setPinned(false);
+        post.setFeatured(false);
+        post.setViewCount(0L);
+        postRepository.insert(post);
+        return post;
     }
 
     @Transactional
     public Post getAndIncreaseView(Long id) {
         Post post = get(id);
+        postRepository.increaseViewCount(id);
         post.setViewCount(post.getViewCount() + 1);
-        return postRepository.save(post);
+        return post;
     }
 
     @Transactional
@@ -50,7 +55,8 @@ public class PostService {
         post.setAuthorId(request.authorId());
         post.setTitle(request.title());
         post.setContent(request.content());
-        return postRepository.save(post);
+        postRepository.update(post);
+        return post;
     }
 
     @Transactional
@@ -60,16 +66,12 @@ public class PostService {
 
     @Transactional
     public void pin(Long id, boolean value) {
-        Post post = get(id);
-        post.setPinned(value);
-        postRepository.save(post);
+        postRepository.updatePinned(id, value);
     }
 
     @Transactional
     public void feature(Long id, boolean value) {
-        Post post = get(id);
-        post.setFeatured(value);
-        postRepository.save(post);
+        postRepository.updateFeatured(id, value);
     }
 
     public boolean exists(Long id) {
@@ -77,11 +79,33 @@ public class PostService {
     }
 
     public Post get(Long id) {
-        return postRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("post not found"));
+        Post post = postRepository.selectById(id);
+        if (post == null) {
+            throw new IllegalArgumentException("post not found");
+        }
+        return post;
     }
 
     public List<Post> search(String q) {
-        return postRepository.fullTextSearch(q + "*");
+        if (q == null || q.trim().isEmpty()) {
+            // 空查询时返回所有帖子，按创建时间倒序
+            return postRepository.findAllOrderByCreatedAtDesc();
+        }
+        // Escape special characters for boolean mode
+        String escaped = q.replace("+", " ")
+                          .replace("-", " ")
+                          .replace(">", " ")
+                          .replace("<", " ")
+                          .replace("(", " ")
+                          .replace(")", " ")
+                          .replace("~", " ")
+                          .replace("*", " ")
+                          .replace("\"", " ");
+        return postRepository.fullTextSearch(escaped.trim() + "*");
+    }
+
+    public List<Post> listBySection(Long sectionId) {
+        return postRepository.findBySectionIdOrderByCreatedAtDesc(sectionId);
     }
 
     public List<String> suggest(String q) {
@@ -89,4 +113,3 @@ public class PostService {
                 .stream().map(Post::getTitle).distinct().toList();
     }
 }
-

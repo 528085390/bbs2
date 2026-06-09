@@ -20,17 +20,21 @@ public class CommentController {
     }
 
     @PostMapping("/api/posts/{postId}/comments")
-    public ApiResponse<Comment> create(@PathVariable Long postId, @Valid @RequestBody CommentRequest request) {
-        return ApiResponse.ok(commentService.create(postId, request));
+    public ApiResponse<Comment> create(@PathVariable("postId") Long postId, @Valid @RequestBody CommentRequest request) {
+        try {
+            return ApiResponse.ok(commentService.create(postId, request));
+        } catch (IllegalArgumentException e) {
+            return new ApiResponse<>(400, e.getMessage(), null);
+        }
     }
 
     @GetMapping("/api/posts/{postId}/comments")
-    public ApiResponse<List<Comment>> list(@PathVariable Long postId) {
+    public ApiResponse<List<Comment>> list(@PathVariable("postId") Long postId) {
         return ApiResponse.ok(commentService.list(postId));
     }
 
     @DeleteMapping("/api/comments/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id) {
+    public ApiResponse<Void> delete(@PathVariable("id") Long id) {
         commentService.delete(id);
         return ApiResponse.ok();
     }

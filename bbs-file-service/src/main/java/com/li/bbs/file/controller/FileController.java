@@ -25,7 +25,7 @@ public class FileController {
     }
 
     @PostMapping("/posts/{postId}/image")
-    public ApiResponse<FileMeta> uploadPostImage(@PathVariable Long postId,
+    public ApiResponse<FileMeta> uploadPostImage(@PathVariable("postId") Long postId,
                                                  @RequestPart("file") MultipartFile file,
                                                  @RequestParam(required = false) Long ownerId) throws IOException {
         Long finalOwnerId = ownerId == null ? postId : ownerId;
@@ -33,12 +33,12 @@ public class FileController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<FileMeta> get(@PathVariable Long id) {
+    public ApiResponse<FileMeta> get(@PathVariable("id") Long id) {
         return ApiResponse.ok(fileService.get(id));
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable Long id) throws IOException {
+    public ApiResponse<Void> delete(@PathVariable("id") Long id) throws IOException {
         fileService.delete(id);
         return ApiResponse.ok();
     }

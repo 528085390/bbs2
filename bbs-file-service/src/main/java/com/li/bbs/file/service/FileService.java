@@ -45,17 +45,21 @@ public class FileService {
         meta.setStoragePath(target.toString());
         meta.setContentType(file.getContentType());
         meta.setSize(file.getSize());
-        return fileMetaRepository.save(meta);
+        fileMetaRepository.insert(meta);
+        return meta;
     }
 
     public FileMeta get(Long id) {
-        return fileMetaRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("file not found"));
+        FileMeta meta = fileMetaRepository.findById(id);
+        if (meta == null) {
+            throw new IllegalArgumentException("file not found");
+        }
+        return meta;
     }
 
     public void delete(Long id) throws IOException {
         FileMeta meta = get(id);
         Files.deleteIfExists(Paths.get(meta.getStoragePath()));
-        fileMetaRepository.delete(meta);
+        fileMetaRepository.deleteById(id);
     }
 }
-

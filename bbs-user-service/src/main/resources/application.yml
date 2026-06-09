@@ -9,6 +9,19 @@ spring:
         server-addr: ${NACOS_ADDR:127.0.0.1:8848}
       username: nacos
       password: 123456
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/bbs_user_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:123456}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+mybatis:
+  type-aliases-package: com.li.bbs.user.domain
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
 management:
   endpoints:
     web:

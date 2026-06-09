@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.li.bbs.user.repository.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.li.bbs.user.domain.User">
+        <id column="id" property="id"/>
+        <result column="display_name" property="displayName"/>
+        <result column="profile" property="profile"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="UserResultMap">
+        SELECT id, display_name, profile
+        FROM users
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <update id="updateProfile">
+        UPDATE users
+        SET display_name = #{displayName},
+            profile = #{profile},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insert" parameterType="com.li.bbs.user.domain.User">
+        INSERT INTO users (id, display_name, profile, created_at, updated_at)
+        VALUES (#{id}, #{displayName}, #{profile}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    </insert>
+</mapper>
+

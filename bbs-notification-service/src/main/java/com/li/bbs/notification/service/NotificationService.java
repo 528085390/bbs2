@@ -31,7 +31,7 @@ public class NotificationService {
         notification.setUserId(userId);
         notification.setType(type);
         notification.setPayload(payload);
-        notificationRepository.save(notification);
+        notification.setRead(false);
+        notificationRepository.insert(notification);
     }
 }
-

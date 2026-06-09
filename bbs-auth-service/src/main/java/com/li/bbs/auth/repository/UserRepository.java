@@ -1,13 +1,27 @@
 package com.li.bbs.auth.repository;
 
 import com.li.bbs.auth.domain.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.li.bbs.auth.domain.Role;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
-import java.util.Optional;
+import java.util.List;
 
-public interface UserRepository extends JpaRepository<User, Long> {
-    Optional<User> findByUsername(String username);
-    boolean existsByUsername(String username);
-    boolean existsByEmail(String email);
+@Mapper
+public interface UserRepository {
+
+    User findByUsername(@Param("username") String username);
+
+    User findByEmail(@Param("email") String email);
+
+    boolean existsByUsername(@Param("username") String username);
+
+    boolean existsByEmail(@Param("email") String email);
+
+    int insert(User user);
+
+    int insertUserRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
+
+    List<Role> findRolesByUserId(@Param("userId") Long userId);
 }
 

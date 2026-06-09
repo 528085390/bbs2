@@ -14,19 +14,20 @@ spring:
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/bbs_auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:root}
     password: ${MYSQL_PASSWORD:123456}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+      data-locations: classpath:data.sql
+mybatis:
+  type-aliases-package: com.li.bbs.auth.domain
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
 
 app:
   jwt:
     secret: ${JWT_SECRET:change_this_secret_to_a_long_random_value_at_least_32_chars}
     expiration-ms: 3600000
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
 

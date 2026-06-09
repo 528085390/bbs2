@@ -1,11 +1,16 @@
 package com.li.bbs.comment.repository;
 
 import com.li.bbs.comment.domain.Comment;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface CommentRepository extends JpaRepository<Comment, Long> {
+@Mapper
+@Repository
+public interface CommentRepository {
     List<Comment> findByPostIdAndDeletedFalseOrderByCreatedAtAsc(Long postId);
+    Comment selectById(Long id);
+    int insert(Comment comment);
+    int updateDeleted(Comment comment);
 }
-

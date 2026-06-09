@@ -49,24 +49,27 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(req.getPassword()));
         user.setDisplayName(req.getUsername());
 
-        Role userRole = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
-            Role r = new Role();
-            r.setName("ROLE_USER");
-            r.setDescription("Default user role");
-            return roleRepository.save(r);
-        });
+        Role userRole = roleRepository.findByName("ROLE_USER");
+        if (userRole == null) {
+            userRole = new Role();
+            userRole.setName("ROLE_USER");
+            userRole.setDescription("Default user role");
+            roleRepository.insert(userRole);
+        }
 
-        user.getRoles().add(userRole);
-
-        userRepository.save(user);
+        userRepository.insert(user);
+        userRepository.insertUserRole(user.getId(), userRole.getId());
     }
 
     public LoginResponse login(LoginRequest req) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
 
-        User user = userRepository.findByUsername(req.getUsername()).orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+        User user = userRepository.findByUsername(req.getUsername());
+        if (user == null) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
 
-        List<String> roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toList());
+        List<String> roles = userRepository.findRolesByUserId(user.getId()).stream().map(Role::getName).collect(Collectors.toList());
         String token = jwtProvider.generateToken(user.getUsername(), roles);
 
         return new LoginResponse(token, 3600L);
