@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -28,18 +27,6 @@ public class NotificationController {
     @PostMapping("/system")
     public ApiResponse<Void> systemNotify(@Valid @RequestBody NotificationRequest request) {
         notificationService.push(request.userId(), request.type(), request.payload());
-        return ApiResponse.ok();
-    }
-
-    @PostMapping("/internal/comment")
-    public ApiResponse<Void> commentNotify(@RequestBody Map<String, Object> req) {
-        notificationService.push(Long.parseLong(String.valueOf(req.get("userId"))), String.valueOf(req.get("type")), String.valueOf(req.get("payload")));
-        return ApiResponse.ok();
-    }
-
-    @PostMapping("/internal/interaction")
-    public ApiResponse<Void> interactionNotify(@RequestBody Map<String, Object> req) {
-        notificationService.push(Long.parseLong(String.valueOf(req.get("userId"))), String.valueOf(req.get("type")), String.valueOf(req.get("payload")));
         return ApiResponse.ok();
     }
 }

@@ -1,12 +1,13 @@
 package com.li.bbs.interaction.service;
 
 import com.li.bbs.common.ApiResponse;
-import com.li.bbs.interaction.client.NotificationClient;
+import com.li.bbs.common.mq.NotificationEvent;
 import com.li.bbs.interaction.client.PostClient;
 import com.li.bbs.interaction.domain.FollowRelation;
 import com.li.bbs.interaction.domain.Interaction;
 import com.li.bbs.interaction.repository.FollowRelationRepository;
 import com.li.bbs.interaction.repository.InteractionRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,16 +22,16 @@ public class InteractionService {
     private final InteractionRepository interactionRepository;
     private final FollowRelationRepository followRelationRepository;
     private final PostClient postClient;
-    private final NotificationClient notificationClient;
+    private final RabbitTemplate rabbitTemplate;
 
     public InteractionService(InteractionRepository interactionRepository,
                               FollowRelationRepository followRelationRepository,
                               PostClient postClient,
-                              NotificationClient notificationClient) {
+                              RabbitTemplate rabbitTemplate) {
         this.interactionRepository = interactionRepository;
         this.followRelationRepository = followRelationRepository;
         this.postClient = postClient;
-        this.notificationClient = notificationClient;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional
@@ -50,11 +51,9 @@ public class InteractionService {
             relation.setUserId(userId);
             relation.setTargetUserId(targetUserId);
             followRelationRepository.insert(relation);
-            notificationClient.sendInteractionNotification(Map.of(
-                    "userId", targetUserId,
-                    "type", "FOLLOW",
-                    "payload", "fromUserId=" + userId
-            ));
+            rabbitTemplate.convertAndSend("bbs.notification", "notification.interaction",
+                    new NotificationEvent(targetUserId, "FOLLOW",
+                            "fromUserId=" + userId));
         }
     }
 
@@ -79,11 +78,9 @@ public class InteractionService {
 
             Long postAuthorId = Long.parseLong(String.valueOf(metaResp.data().get("authorId")));
             if (!postAuthorId.equals(userId)) {
-                notificationClient.sendInteractionNotification(Map.of(
-                        "userId", postAuthorId,
-                        "type", action,
-                        "payload", "postId=" + postId + ",fromUserId=" + userId
-                ));
+                rabbitTemplate.convertAndSend("bbs.notification", "notification.interaction",
+                        new NotificationEvent(postAuthorId, action,
+                                "postId=" + postId + ",fromUserId=" + userId));
             }
         }
     }

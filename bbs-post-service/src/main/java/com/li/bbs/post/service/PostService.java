@@ -5,6 +5,9 @@ import com.li.bbs.post.client.SectionClient;
 import com.li.bbs.post.domain.Post;
 import com.li.bbs.post.dto.PostRequest;
 import com.li.bbs.post.repository.PostRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ public class PostService {
     }
 
     @Transactional
+    @CacheEvict(value = "bbs:posts:section", key = "#request.sectionId()")
     public Post create(PostRequest request) {
         ApiResponse<?> sectionResp = sectionClient.getSection(request.sectionId());
         if (sectionResp == null || sectionResp.code() != 0 || sectionResp.data() == null) {
@@ -42,15 +46,25 @@ public class PostService {
 
     @Transactional
     public Post getAndIncreaseView(Long id) {
-        Post post = get(id);
+        Post post = postRepository.selectById(id);
+        if (post == null) {
+            throw new IllegalArgumentException("post not found");
+        }
         postRepository.increaseViewCount(id);
         post.setViewCount(post.getViewCount() + 1);
         return post;
     }
 
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "bbs:posts", key = "#id"),
+        @CacheEvict(value = "bbs:posts:section", allEntries = true)
+    })
     public Post update(Long id, PostRequest request) {
-        Post post = get(id);
+        Post post = postRepository.selectById(id);
+        if (post == null) {
+            throw new IllegalArgumentException("post not found");
+        }
         post.setSectionId(request.sectionId());
         post.setAuthorId(request.authorId());
         post.setTitle(request.title());
@@ -60,16 +74,28 @@ public class PostService {
     }
 
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "bbs:posts", key = "#id"),
+        @CacheEvict(value = "bbs:posts:section", allEntries = true)
+    })
     public void delete(Long id) {
         postRepository.deleteById(id);
     }
 
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "bbs:posts", key = "#id"),
+        @CacheEvict(value = "bbs:posts:section", allEntries = true)
+    })
     public void pin(Long id, boolean value) {
         postRepository.updatePinned(id, value);
     }
 
     @Transactional
+    @Caching(evict = {
+        @CacheEvict(value = "bbs:posts", key = "#id"),
+        @CacheEvict(value = "bbs:posts:section", allEntries = true)
+    })
     public void feature(Long id, boolean value) {
         postRepository.updateFeatured(id, value);
     }
@@ -78,6 +104,7 @@ public class PostService {
         return postRepository.existsById(id);
     }
 
+    @Cacheable(value = "bbs:posts", key = "#id")
     public Post get(Long id) {
         Post post = postRepository.selectById(id);
         if (post == null) {
@@ -88,10 +115,8 @@ public class PostService {
 
     public List<Post> search(String q) {
         if (q == null || q.trim().isEmpty()) {
-            // 空查询时返回所有帖子，按创建时间倒序
             return postRepository.findAllOrderByCreatedAtDesc();
         }
-        // Escape special characters for boolean mode
         String escaped = q.replace("+", " ")
                           .replace("-", " ")
                           .replace(">", " ")
@@ -104,6 +129,7 @@ public class PostService {
         return postRepository.fullTextSearch(escaped.trim() + "*");
     }
 
+    @Cacheable(value = "bbs:posts:section", key = "#sectionId")
     public List<Post> listBySection(Long sectionId) {
         return postRepository.findBySectionIdOrderByCreatedAtDesc(sectionId);
     }

@@ -1,11 +1,12 @@
 package com.li.bbs.comment.service;
 
-import com.li.bbs.comment.client.NotificationClient;
 import com.li.bbs.comment.client.PostClient;
 import com.li.bbs.comment.domain.Comment;
 import com.li.bbs.comment.dto.CommentRequest;
 import com.li.bbs.comment.repository.CommentRepository;
 import com.li.bbs.common.ApiResponse;
+import com.li.bbs.common.mq.NotificationEvent;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,12 +18,12 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final PostClient postClient;
-    private final NotificationClient notificationClient;
+    private final RabbitTemplate rabbitTemplate;
 
-    public CommentService(CommentRepository commentRepository, PostClient postClient, NotificationClient notificationClient) {
+    public CommentService(CommentRepository commentRepository, PostClient postClient, RabbitTemplate rabbitTemplate) {
         this.commentRepository = commentRepository;
         this.postClient = postClient;
-        this.notificationClient = notificationClient;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional
@@ -46,7 +47,6 @@ public class CommentService {
             }
             comment.setDepth(parent.getDepth() + 1);
         } else {
-            // 顶级评论
             comment.setParentId(null);
             comment.setDepth(0);
         }
@@ -55,11 +55,9 @@ public class CommentService {
 
         Long postAuthorId = Long.parseLong(String.valueOf(metaResp.data().get("authorId")));
         if (!postAuthorId.equals(request.authorId())) {
-            notificationClient.sendCommentNotification(Map.of(
-                    "userId", postAuthorId,
-                    "type", "COMMENT",
-                    "payload", "postId=" + postId + ",commentId=" + comment.getId() + ",fromUserId=" + request.authorId()
-            ));
+            rabbitTemplate.convertAndSend("bbs.notification", "notification.comment",
+                    new NotificationEvent(postAuthorId, "COMMENT",
+                            "postId=" + postId + ",commentId=" + comment.getId() + ",fromUserId=" + request.authorId()));
         }
 
         return comment;

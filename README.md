@@ -21,7 +21,7 @@
 docker compose up -d
 ```
 
-默认 Nacos 地址：`127.0.0.1:8848`，MySQL：`127.0.0.1:3306`。
+默认 Nacos 地址：`127.0.0.1:8848`，MySQL：`127.0.0.1:3306`，Redis：`127.0.0.1:6379`。
 
 ## 2. 初始化数据库
 
@@ -68,11 +68,15 @@ mysql -uroot -proot < sql/file/schema.sql
 - 文件：`POST http://localhost:8080/api/files/avatar` (multipart)
 - 搜索：`GET http://localhost:8080/api/search?q=keyword`
 
-## 说明
+## 功能特性
 
-当前提交为“可运行骨架 + 关键接口路径”，便于后续继续增强：
-- 引入 OpenFeign 做服务调用
-- 将内存实现替换为 MySQL 持久化
-- 给所有业务服务增加 JWT 统一验签过滤器
-- 将通知异步改造为 MQ（如 RocketMQ / Kafka）
+- **多级缓存**：基于 Redis + Spring Cache 的多级缓存，热点帖子、版块、用户资料缓存命中，显著降低 DB 压力
+- **服务鉴权**：网关层 JWT 统一鉴权，业务服务通过请求头获取用户上下文
+- **服务间通信**：基于 OpenFeign 的声明式服务调用，Nacos 服务发现与负载均衡
+
+## 后续规划
+
+- 将通知异步改造为 MQ（如 RocketMQ / RabbitMQ）
+- 引入 Sentinel 实现服务熔断降级与限流
+- 容器化各微服务
 

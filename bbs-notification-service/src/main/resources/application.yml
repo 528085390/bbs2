@@ -9,6 +9,11 @@ spring:
         server-addr: ${NACOS_ADDR:127.0.0.1:8848}
         username: ${NACOS_USERNAME:nacos}
         password: ${NACOS_PASSWORD:123456}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:127.0.0.1}:${MYSQL_PORT:3306}/bbs_notify_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: ${MYSQL_USER:root}

@@ -17,6 +17,16 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+  data:
+    redis:
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:123456}
+  cache:
+    type: redis
+    redis:
+      time-to-live: 600000
+      cache-null-values: false
 mybatis:
   type-aliases-package: com.li.bbs.user.domain
   mapper-locations: classpath*:mapper/*.xml

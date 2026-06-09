@@ -3,17 +3,15 @@ package com.li.bbs.notification;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableAsync;
 
 /**
  * BBS通知服务启动类
  * 提供系统通知、消息推送、站内信管理等功能
- * 支持异步消息处理，提高系统响应速度
+ * 通过RabbitMQ异步消费通知消息，保证消息可靠投递
  *
  * @author li
  * @since 1.0.0
  */
-@EnableAsync
 @MapperScan("com.li.bbs.notification.repository")
 @SpringBootApplication
 public class BbsNotificationApplication {
