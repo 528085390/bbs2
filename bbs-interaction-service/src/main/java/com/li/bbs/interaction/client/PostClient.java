@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Map;
 
-@FeignClient(name = "bbs-post-service")
+@FeignClient(name = "bbs-post-service", fallbackFactory = PostClientFallbackFactory.class)
 public interface PostClient {
 
     @GetMapping("/api/posts/{id}/meta")

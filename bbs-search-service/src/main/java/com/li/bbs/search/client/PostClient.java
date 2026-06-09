@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient(name = "bbs-post-service")
+@FeignClient(name = "bbs-post-service", fallbackFactory = PostClientFallbackFactory.class)
 public interface PostClient {
 
     @GetMapping("/api/posts/internal/search")

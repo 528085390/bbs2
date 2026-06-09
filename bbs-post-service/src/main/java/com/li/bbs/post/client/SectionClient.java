@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.Map;
 
-@FeignClient(name = "bbs-section-service")
+@FeignClient(name = "bbs-section-service", fallbackFactory = SectionClientFallbackFactory.class)
 public interface SectionClient {
 
     @GetMapping("/api/sections/{id}")
