@@ -27,6 +27,10 @@ spring:
     redis:
       time-to-live: 600000
       cache-null-values: false
+  elasticsearch:
+    uris: ${ES_URIS:http://127.0.0.1:9200}
+    connection-timeout: 5s
+    socket-timeout: 30s
 mybatis:
   type-aliases-package: com.li.bbs.post.domain
   mapper-locations: classpath*:mapper/*.xml
@@ -35,6 +39,7 @@ mybatis:
 feign:
   sentinel:
     enabled: true
+
 
 management:
   endpoints:

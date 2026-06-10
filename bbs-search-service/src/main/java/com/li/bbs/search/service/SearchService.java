@@ -1,23 +1,27 @@
 package com.li.bbs.search.service;
 
-import com.li.bbs.common.ApiResponse;
-import com.li.bbs.search.client.PostClient;
+import com.li.bbs.common.document.PostDocument;
 import com.li.bbs.search.domain.SearchHistory;
 import com.li.bbs.search.repository.SearchHistoryRepository;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class SearchService {
 
-    private final PostClient postClient;
+    private final ElasticsearchOperations elasticsearchOperations;
     private final SearchHistoryRepository searchHistoryRepository;
 
-    public SearchService(PostClient postClient, SearchHistoryRepository searchHistoryRepository) {
-        this.postClient = postClient;
+    public SearchService(ElasticsearchOperations elasticsearchOperations,
+                         SearchHistoryRepository searchHistoryRepository) {
+        this.elasticsearchOperations = elasticsearchOperations;
         this.searchHistoryRepository = searchHistoryRepository;
     }
 
@@ -28,20 +32,33 @@ public class SearchService {
         history.setKeyword(q);
         searchHistoryRepository.insert(history);
 
-        ApiResponse<List<Map<String, Object>>> resp = postClient.search(q);
-        if (resp == null || resp.code() != 0 || resp.data() == null) {
-            return List.of();
-        }
+        String json = """
+                {
+                  "query": {
+                    "multi_match": {
+                      "query": "%s",
+                      "fields": ["title^3", "content"]
+                    }
+                  }
+                }
+                """.formatted(escapeJson(q));
 
-        return resp.data().stream().map(item -> {
-            String content = String.valueOf(item.getOrDefault("content", ""));
-            String snippet = highlight(content, q);
-            return Map.of(
-                    "postId", item.get("id"),
-                    "title", item.get("title"),
-                    "snippet", snippet
-            );
-        }).toList();
+        SearchHits<PostDocument> hits = elasticsearchOperations.search(new StringQuery(json), PostDocument.class);
+
+        return hits.getSearchHits().stream()
+                .map(hit -> {
+                    PostDocument doc = hit.getContent();
+                    String snippet = doc.getContent();
+                    if (snippet != null && snippet.length() > 80) {
+                        snippet = snippet.substring(0, 80) + "...";
+                    }
+                    Map<String, Object> item = new HashMap<>();
+                    item.put("postId", doc.getId());
+                    item.put("title", doc.getTitle());
+                    item.put("snippet", snippet);
+                    return item;
+                })
+                .toList();
     }
 
     public List<String> suggest(String q) {
@@ -50,24 +67,29 @@ public class SearchService {
             return fromHistory;
         }
 
-        ApiResponse<List<String>> resp = postClient.suggest(q);
-        if (resp == null || resp.code() != 0 || resp.data() == null) {
-            return List.of();
-        }
-        return resp.data();
+        String json = """
+                {
+                  "query": {
+                    "match": {
+                      "title": "%s"
+                    }
+                  },
+                  "size": 10
+                }
+                """.formatted(escapeJson(q));
+
+        SearchHits<PostDocument> hits = elasticsearchOperations.search(new StringQuery(json), PostDocument.class);
+        return hits.getSearchHits().stream()
+                .map(hit -> hit.getContent().getTitle())
+                .distinct()
+                .toList();
     }
 
-    private String highlight(String content, String q) {
-        if (content == null || content.isBlank()) {
-            return "";
-        }
-        int idx = content.toLowerCase().indexOf(q.toLowerCase());
-        if (idx < 0) {
-            return content.length() > 80 ? content.substring(0, 80) + "..." : content;
-        }
-        int start = Math.max(0, idx - 20);
-        int end = Math.min(content.length(), idx + q.length() + 20);
-        String snippet = content.substring(start, end);
-        return snippet.replaceAll("(?i)" + java.util.regex.Pattern.quote(q), "<em>" + q + "</em>");
+    private String escapeJson(String s) {
+        return s.replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t");
     }
 }

@@ -1,31 +1,394 @@
 version: '3.8'
+
+networks:
+  bbs-net:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  nacos_data:
+  es_data:
+
 services:
+  # ==================== 基础设施 ====================
+
   nacos:
     image: nacos/nacos-server:v2.3.2
+    container_name: bbs-nacos
     environment:
       - MODE=standalone
     ports:
       - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos_data:/home/nacos/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+    networks:
+      - bbs-net
 
   mysql:
     image: mysql:8.0
+    container_name: bbs-mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_DATABASE=bbs_forum_db
     ports:
       - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
     command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - bbs-net
 
   redis:
     image: redis:7.2
+    container_name: bbs-redis
     ports:
       - "6379:6379"
+    networks:
+      - bbs-net
 
   rabbitmq:
     image: rabbitmq:3.13-management
-    environment:
-      - RABBITMQ_DEFAULT_USER=admin
-      - RABBITMQ_DEFAULT_PASS=123456
+    container_name: bbs-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    networks:
+      - bbs-net
 
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: Dockerfile.elasticsearch
+    container_name: bbs-es
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ingest.geoip.downloader.enabled=false
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
+    networks:
+      - bbs-net
+
+  # ==================== 业务服务 ====================
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-gateway
+    container_name: bbs-gateway
+    ports:
+      - "8888:8888"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+    depends_on:
+      nacos:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-auth-service
+    container_name: bbs-auth-service
+    ports:
+      - "9001:9001"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  user-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-user-service
+    container_name: bbs-user-service
+    ports:
+      - "9002:9002"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  permission-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-permission-service
+    container_name: bbs-permission-service
+    ports:
+      - "9003:9003"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  section-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-section-service
+    container_name: bbs-section-service
+    ports:
+      - "9004:9004"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  post-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-post-service
+    container_name: bbs-post-service
+    ports:
+      - "9005:9005"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=
+      - ES_URIS=http://elasticsearch:9200
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  comment-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-comment-service
+    container_name: bbs-comment-service
+    ports:
+      - "9006:9006"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  interaction-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-interaction-service
+    container_name: bbs-interaction-service
+    ports:
+      - "9007:9007"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-notification-service
+    container_name: bbs-notification-service
+    ports:
+      - "9008:9008"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+      - RABBITMQ_HOST=rabbitmq
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  file-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-file-service
+    container_name: bbs-file-service
+    ports:
+      - "9009:9009"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  search-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE: bbs-search-service
+    container_name: bbs-search-service
+    ports:
+      - "9010:9010"
+    environment:
+      - NACOS_ADDR=nacos:8848
+      - NACOS_USERNAME=nacos
+      - NACOS_PASSWORD=nacos
+      - MYSQL_HOST=mysql
+      - MYSQL_PASSWORD=123456
+      - ES_URIS=http://elasticsearch:9200
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    restart: on-failure
+    networks:
+      - bbs-net
+
+  # ==================== 反向代理 ====================
+
+  nginx:
+    image: nginx:alpine
+    container_name: bbs-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - gateway
+    networks:
+      - bbs-net

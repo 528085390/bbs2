@@ -8,7 +8,6 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -73,24 +72,5 @@ public class PostController {
     @GetMapping("/section/{sectionId}")
     public ApiResponse<List<Post>> listBySection(@PathVariable("sectionId") Long sectionId) {
         return ApiResponse.ok(postService.listBySection(sectionId));
-    }
-
-    @GetMapping("/internal/search")
-    public ApiResponse<List<Map<String, Object>>> internalSearch(@RequestParam("q") String q) {
-        List<Map<String, Object>> result = postService.search(q).stream()
-                .map(post -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("id", post.getId());
-                    item.put("title", post.getTitle());
-                    item.put("content", post.getContent());
-                    return item;
-                })
-                .toList();
-        return ApiResponse.ok(result);
-    }
-
-    @GetMapping("/internal/suggest")
-    public ApiResponse<List<String>> internalSuggest(@RequestParam("q") String q) {
-        return ApiResponse.ok(postService.suggest(q));
     }
 }

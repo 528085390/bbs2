@@ -54,31 +54,11 @@
         SELECT COUNT(1) FROM posts WHERE id = #{id}
     </select>
 
-    <select id="fullTextSearch" resultMap="PostResultMap">
-        SELECT id, section_id, author_id, title, content, pinned, featured, view_count, created_at, updated_at
-        FROM posts
-        WHERE MATCH(title, content) AGAINST (#{keyword} IN BOOLEAN MODE)
-    </select>
-
     <select id="findBySectionIdOrderByCreatedAtDesc" resultMap="PostResultMap">
         SELECT id, section_id, author_id, title, content, pinned, featured, view_count, created_at, updated_at
         FROM posts
         WHERE section_id = #{sectionId}
         ORDER BY created_at DESC
-    </select>
-
-    <select id="findAllOrderByCreatedAtDesc" resultMap="PostResultMap">
-        SELECT id, section_id, author_id, title, content, pinned, featured, view_count, created_at, updated_at
-        FROM posts
-        ORDER BY created_at DESC
-    </select>
-
-    <select id="findTop10ByTitleStartingWithIgnoreCaseOrderByCreatedAtDesc" resultMap="PostResultMap">
-        SELECT id, section_id, author_id, title, content, pinned, featured, view_count, created_at, updated_at
-        FROM posts
-        WHERE title LIKE CONCAT(#{keyword}, '%')
-        ORDER BY created_at DESC
-        LIMIT 10
     </select>
 </mapper>
 

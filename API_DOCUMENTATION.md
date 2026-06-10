@@ -242,33 +242,6 @@ GET /api/posts/section/{sectionId}
 
 **Response:** `ApiResponse<List<Post>>`
 
-### 3.10 内部搜索帖子
-
-```
-GET /api/posts/internal/search?q=<keyword>
-```
-
-**用途:** 其他微服务内部调用
-
-**Response:** `ApiResponse<List<Map<String, Object>>>`
-```json
-[
-  {
-    "id": "number",
-    "title": "string",
-    "content": "string"
-  }
-]
-```
-
-### 3.11 内部搜索建议
-
-```
-GET /api/posts/internal/suggest?q=<keyword>
-```
-
-**Response:** `ApiResponse<List<string>>`
-
 ---
 
 ## 4. 评论服务 (`bbs-comment-service`)
@@ -518,6 +491,8 @@ DELETE /api/files/{id}
 
 ## 8. 搜索服务 (`bbs-search-service`)
 
+> 基于 Elasticsearch 8.x 的全文搜索，支持中文分词
+
 ### 8.1 搜索
 
 ```
@@ -530,6 +505,15 @@ GET /api/search?q=<keyword>&userId=<userId>
 | userId | Long | 用户 ID (可选, 用于记录搜索历史) |
 
 **Response:** `ApiResponse<List<Map<String, Object>>>`
+```json
+[
+  {
+    "postId": "number",
+    "title": "string (可能含高亮标记)",
+    "snippet": "string (内容摘要)"
+  }
+]
+```
 
 ### 8.2 搜索建议
 

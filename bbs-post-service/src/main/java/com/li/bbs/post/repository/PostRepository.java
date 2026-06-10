@@ -18,8 +18,5 @@ public interface PostRepository {
     int updatePinned(@Param("id") Long id, @Param("value") boolean value);
     int updateFeatured(@Param("id") Long id, @Param("value") boolean value);
     boolean existsById(Long id);
-    List<Post> fullTextSearch(@Param("keyword") String keyword);
     List<Post> findBySectionIdOrderByCreatedAtDesc(@Param("sectionId") Long sectionId);
-    List<Post> findAllOrderByCreatedAtDesc();
-    List<Post> findTop10ByTitleStartingWithIgnoreCaseOrderByCreatedAtDesc(@Param("keyword") String keyword);
 }

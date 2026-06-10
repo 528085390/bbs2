@@ -18,10 +18,12 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final SectionClient sectionClient;
+    private final PostIndexService postIndexService;
 
-    public PostService(PostRepository postRepository, SectionClient sectionClient) {
+    public PostService(PostRepository postRepository, SectionClient sectionClient, PostIndexService postIndexService) {
         this.postRepository = postRepository;
         this.sectionClient = sectionClient;
+        this.postIndexService = postIndexService;
     }
 
     @Transactional
@@ -41,6 +43,7 @@ public class PostService {
         post.setFeatured(false);
         post.setViewCount(0L);
         postRepository.insert(post);
+        postIndexService.indexPost(post);
         return post;
     }
 
@@ -70,6 +73,7 @@ public class PostService {
         post.setTitle(request.title());
         post.setContent(request.content());
         postRepository.update(post);
+        postIndexService.indexPost(post);
         return post;
     }
 
@@ -80,6 +84,7 @@ public class PostService {
     })
     public void delete(Long id) {
         postRepository.deleteById(id);
+        postIndexService.deletePost(id);
     }
 
     @Transactional
@@ -113,29 +118,8 @@ public class PostService {
         return post;
     }
 
-    public List<Post> search(String q) {
-        if (q == null || q.trim().isEmpty()) {
-            return postRepository.findAllOrderByCreatedAtDesc();
-        }
-        String escaped = q.replace("+", " ")
-                          .replace("-", " ")
-                          .replace(">", " ")
-                          .replace("<", " ")
-                          .replace("(", " ")
-                          .replace(")", " ")
-                          .replace("~", " ")
-                          .replace("*", " ")
-                          .replace("\"", " ");
-        return postRepository.fullTextSearch(escaped.trim() + "*");
-    }
-
     @Cacheable(value = "bbs:posts:section", key = "#sectionId")
     public List<Post> listBySection(Long sectionId) {
         return postRepository.findBySectionIdOrderByCreatedAtDesc(sectionId);
-    }
-
-    public List<String> suggest(String q) {
-        return postRepository.findTop10ByTitleStartingWithIgnoreCaseOrderByCreatedAtDesc(q)
-                .stream().map(Post::getTitle).distinct().toList();
     }
 }

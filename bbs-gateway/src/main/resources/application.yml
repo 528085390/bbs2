@@ -8,8 +8,8 @@ spring:
     nacos:
       discovery:
         server-addr: ${NACOS_ADDR:127.0.0.1:8848}
-      username: nacos
-      password: 123456
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:123456}
     gateway:
       # 全局跨域配置
       globalcors:
