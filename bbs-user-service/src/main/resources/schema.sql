@@ -1,4 +1,5 @@
 CREATE DATABASE IF NOT EXISTS bbs_user_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE bbs_user_db;
 
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT PRIMARY KEY,

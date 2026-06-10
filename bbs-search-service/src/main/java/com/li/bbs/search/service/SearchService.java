@@ -34,11 +34,9 @@ public class SearchService {
 
         String json = """
                 {
-                  "query": {
-                    "multi_match": {
-                      "query": "%s",
-                      "fields": ["title^3", "content"]
-                    }
+                  "multi_match": {
+                    "query": "%s",
+                    "fields": ["title^3", "content"]
                   }
                 }
                 """.formatted(escapeJson(q));
@@ -69,16 +67,16 @@ public class SearchService {
 
         String json = """
                 {
-                  "query": {
-                    "match": {
-                      "title": "%s"
-                    }
-                  },
-                  "size": 10
+                  "match": {
+                    "title": "%s"
+                  }
                 }
                 """.formatted(escapeJson(q));
 
-        SearchHits<PostDocument> hits = elasticsearchOperations.search(new StringQuery(json), PostDocument.class);
+        StringQuery stringQuery = new StringQuery(json);
+        stringQuery.setPageable(org.springframework.data.domain.PageRequest.of(0, 10));
+
+        SearchHits<PostDocument> hits = elasticsearchOperations.search(stringQuery, PostDocument.class);
         return hits.getSearchHits().stream()
                 .map(hit -> hit.getContent().getTitle())
                 .distinct()

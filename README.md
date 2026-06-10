@@ -105,7 +105,7 @@ mysql -uroot -proot < sql/file/schema.sql
 
 ## 详细文档
 
-- [API 文档](API_DOCUMENTATION.md)
+- [API 文档](API.md)
 - [Redis 缓存教程](REDIS_TUTORIAL.md)
 - [RabbitMQ 消息队列教程](RABBITMQ_TUTORIAL.md)
 - [Sentinel 熔断限流教程](SENTINEL_TUTORIAL.md)

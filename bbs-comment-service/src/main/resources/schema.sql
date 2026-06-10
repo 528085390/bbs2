@@ -1,3 +1,6 @@
+CREATE DATABASE IF NOT EXISTS bbs_forum_db DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE bbs_forum_db;
+
 CREATE TABLE IF NOT EXISTS comments (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   post_id BIGINT NOT NULL,
@@ -6,6 +9,7 @@ CREATE TABLE IF NOT EXISTS comments (
   content TEXT,
   depth INT DEFAULT 0,
   deleted BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_comments_post (post_id)
 );
 
