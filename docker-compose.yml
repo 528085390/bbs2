@@ -96,10 +96,7 @@ services:
 
   gateway:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-gateway
+      context: ./bbs-gateway
     container_name: bbs-gateway
     ports:
       - "8888:8888"
@@ -116,10 +113,7 @@ services:
 
   auth-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-auth-service
+      context: ./bbs-auth-service
     container_name: bbs-auth-service
     ports:
       - "9001:9001"
@@ -140,10 +134,7 @@ services:
 
   user-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-user-service
+      context: ./bbs-user-service
     container_name: bbs-user-service
     ports:
       - "9002:9002"
@@ -168,10 +159,7 @@ services:
 
   permission-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-permission-service
+      context: ./bbs-permission-service
     container_name: bbs-permission-service
     ports:
       - "9003:9003"
@@ -192,10 +180,7 @@ services:
 
   section-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-section-service
+      context: ./bbs-section-service
     container_name: bbs-section-service
     ports:
       - "9004:9004"
@@ -220,10 +205,7 @@ services:
 
   post-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-post-service
+      context: ./bbs-post-service
     container_name: bbs-post-service
     ports:
       - "9005:9005"
@@ -249,10 +231,7 @@ services:
 
   comment-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-comment-service
+      context: ./bbs-comment-service
     container_name: bbs-comment-service
     ports:
       - "9006:9006"
@@ -276,10 +255,7 @@ services:
 
   interaction-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-interaction-service
+      context: ./bbs-interaction-service
     container_name: bbs-interaction-service
     ports:
       - "9007:9007"
@@ -303,10 +279,7 @@ services:
 
   notification-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-notification-service
+      context: ./bbs-notification-service
     container_name: bbs-notification-service
     ports:
       - "9008:9008"
@@ -330,10 +303,7 @@ services:
 
   file-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-file-service
+      context: ./bbs-file-service
     container_name: bbs-file-service
     ports:
       - "9009:9009"
@@ -354,10 +324,7 @@ services:
 
   search-service:
     build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE: bbs-search-service
+      context: ./bbs-search-service
     container_name: bbs-search-service
     ports:
       - "9010:9010"
