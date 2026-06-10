@@ -4,9 +4,6 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT_DIR"
 
-FRONTEND_REPO="https://github.com/528085390/ugc-fronted.git"
-FRONTEND_DIR="$ROOT_DIR/../bbs-frontend"
-
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -58,16 +55,7 @@ else
     log_info "Docker daemon.json already exists, skip mirror config."
 fi
 
-# ---------- 4. Clone / pull frontend repo ----------
-if [ ! -d "$FRONTEND_DIR" ]; then
-    log_info "Cloning frontend repo..."
-    git clone "$FRONTEND_REPO" "$FRONTEND_DIR"
-else
-    log_info "Updating frontend repo..."
-    cd "$FRONTEND_DIR" && git pull && cd "$ROOT_DIR"
-fi
-
-# ---------- 5. Check Java ----------
+# ---------- 4. Check Java ----------
 if ! command -v java &>/dev/null; then
     log_error "Java not found. Installing Java 17..."
     sudo apt-get update -qq && sudo apt-get install -y -qq openjdk-17-jdk
@@ -76,7 +64,7 @@ fi
 java_version=$(java -version 2>&1 | head -1 | grep -oP '\d+' | head -1)
 log_info "Java version: $(java -version 2>&1 | head -1)"
 
-# ---------- 6. Build JARs ----------
+# ---------- 5. Build JARs ----------
 log_info "Building all services with Maven..."
 chmod +x mvnw
 ./mvnw clean package -DskipTests -q
@@ -98,7 +86,7 @@ for svc in "${SERVICES[@]}"; do
     log_info "  bbs-$svc: OK ($(basename "$jar_file"))"
 done
 
-# ---------- 7. Pull base images ----------
+# ---------- 6. Pull base images ----------
 log_info "Pre-pulling base images (with retry)..."
 IMAGES=(
     "nacos/nacos-server:v2.3.2"
@@ -120,11 +108,11 @@ for img in "${IMAGES[@]}"; do
     done
 done
 
-# ---------- 8. Start all containers ----------
+# ---------- 7. Start all containers ----------
 log_info "Starting all services via Docker Compose..."
 docker compose up -d --build
 
-# ---------- 9. Wait for health ----------
+# ---------- 8. Wait for health ----------
 log_info "Waiting for services to be healthy..."
 sleep 20
 
@@ -146,25 +134,7 @@ for svc in "${SERVICES[@]}"; do
     [ $i -eq 30 ] && log_warn "  bbs-$svc: not healthy after 150s, continuing..."
 done
 
-# ---------- 10. Build & deploy frontend ----------
-if [ -d "$FRONTEND_DIR" ]; then
-    log_info "Building and deploying frontend..."
-    cd "$FRONTEND_DIR"
-    if ! command -v npm &>/dev/null; then
-        log_info "Installing Node.js..."
-        curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
-        sudo apt-get install -y nodejs
-    fi
-    npm install && npm run build
-
-    docker network inspect bbs-net >/dev/null 2>&1 || docker network create bbs-net
-    docker compose -f docker-compose.yml up -d
-    cd "$ROOT_DIR"
-else
-    log_warn "Frontend repo not found at $FRONTEND_DIR, skipping."
-fi
-
-# ---------- 11. Summary ----------
+# ---------- 9. Summary ----------
 echo ""
 log_info "=== Deployment Summary ==="
 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
